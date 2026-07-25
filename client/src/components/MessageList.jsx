@@ -52,7 +52,7 @@ export default function MessageList({
   useEffect(() => {
     messages.forEach(async (msg) => {
       if (msg.encrypted && msg.messageType === 'text' && !decrypted[msg._id]) {
-        const text = await decryptMessage(msg.content);
+        const text = await decryptMessage(msg.content, msg.conversation?._id || msg.conversation);
         setDecrypted((prev) => ({ ...prev, [msg._id]: text }));
       }
     });

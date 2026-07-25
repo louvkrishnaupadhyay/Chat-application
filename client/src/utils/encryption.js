@@ -18,7 +18,21 @@ const base64ToBuffer = (base64) => {
   return bytes.buffer;
 };
 
-const getOrCreateKey = async () => {
+const getOrCreateKey = async (conversationId) => {
+  if (conversationId) {
+    const idString = conversationId.toString();
+    const encoder = new TextEncoder();
+    const data = encoder.encode(idString);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    return crypto.subtle.importKey(
+      'raw',
+      hash,
+      { name: 'AES-GCM' },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  }
+
   const stored = localStorage.getItem(ENCRYPTION_KEY_STORAGE);
   if (stored) {
     return crypto.subtle.importKey(
@@ -41,8 +55,8 @@ const getOrCreateKey = async () => {
   return key;
 };
 
-export const encryptMessage = async (plaintext) => {
-  const key = await getOrCreateKey();
+export const encryptMessage = async (plaintext, conversationId) => {
+  const key = await getOrCreateKey(conversationId);
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const encoded = new TextEncoder().encode(plaintext);
 
@@ -59,9 +73,9 @@ export const encryptMessage = async (plaintext) => {
   return bufferToBase64(combined.buffer);
 };
 
-export const decryptMessage = async (encryptedBase64) => {
+export const decryptMessage = async (encryptedBase64, conversationId) => {
   try {
-    const key = await getOrCreateKey();
+    const key = await getOrCreateKey(conversationId);
     const combined = new Uint8Array(base64ToBuffer(encryptedBase64));
     const iv = combined.slice(0, 12);
     const data = combined.slice(12);
@@ -73,7 +87,8 @@ export const decryptMessage = async (encryptedBase64) => {
     );
 
     return new TextDecoder().decode(decrypted);
-  } catch {
+  } catch (e) {
+    console.error('Decryption error:', e);
     return '[Unable to decrypt message]';
   }
 };

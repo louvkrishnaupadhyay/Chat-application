@@ -39,7 +39,7 @@ export default function MessageInput({
     let encrypted = false;
 
     if (encryptionEnabled) {
-      content = await encryptMessage(content);
+      content = await encryptMessage(content, conversationId);
       encrypted = true;
     }
 
