@@ -20,8 +20,23 @@ function getConversationAvatar(conversation, currentUserId) {
 
 function getOnlineStatus(conversation, currentUserId) {
   if (conversation.isGroup) return null;
-  const other = conversation.participants.find((p) => p._id !== currentUserId);
+  const other = conversation.participants.find(
+    (p) => String(p._id) !== String(currentUserId)
+  );
   return other?.isOnline;
+}
+
+function getInitial(name) {
+  return (name?.trim()?.[0] ?? '?').toUpperCase();
+}
+
+function formatConversationTime(updatedAt) {
+  if (!updatedAt) return '';
+  try {
+    return formatDistanceToNow(new Date(updatedAt), { addSuffix: true });
+  } catch {
+    return '';
+  }
 }
 
 export default function Sidebar({
@@ -84,8 +99,8 @@ export default function Sidebar({
       </header>
 
       <div className="sidebar-user">
-        <div className="avatar">{currentUser.username[0].toUpperCase()}</div>
-        <span>{currentUser.username}</span>
+        <div className="avatar">{(currentUser?.username?.[0] || '?').toUpperCase()}</div>
+        <span>{currentUser?.username || 'Unknown'}</span>
       </div>
 
       <div className="search-box">
@@ -101,8 +116,8 @@ export default function Sidebar({
           {searchResults.map((u) => (
             <li key={u._id}>
               <button type="button" onClick={() => startDirectChat(u._id)}>
-                <span className="avatar sm">{u.username[0].toUpperCase()}</span>
-                {u.username}
+                <span className="avatar sm">{(u.username?.[0] || '?').toUpperCase()}</span>
+                {u.username || 'Unknown'}
                 <span className={`presence ${u.isOnline ? 'online' : ''}`} />
               </button>
             </li>

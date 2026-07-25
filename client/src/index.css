@@ -236,6 +236,12 @@ input {
   color: var(--text);
 }
 
+.search-error {
+  margin: 0 1rem 0.5rem;
+  font-size: 0.8rem;
+  color: var(--danger, #f87171);
+}
+
 .conversation-list {
   list-style: none;
   overflow-y: auto;

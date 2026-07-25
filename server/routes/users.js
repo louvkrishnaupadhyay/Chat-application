@@ -4,6 +4,8 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 router.get('/search', auth, async (req, res) => {
   try {
     const q = (req.query.q || '').trim();
@@ -11,11 +13,13 @@ router.get('/search', auth, async (req, res) => {
       return res.json([]);
     }
 
+    const safeQuery = escapeRegex(q);
+
     const users = await User.find({
       _id: { $ne: req.user._id },
       $or: [
-        { username: { $regex: q, $options: 'i' } },
-        { email: { $regex: q, $options: 'i' } },
+        { username: { $regex: safeQuery, $options: 'i' } },
+        { email: { $regex: safeQuery, $options: 'i' } },
       ],
     })
       .select('username email avatar isOnline lastSeen publicKey')
