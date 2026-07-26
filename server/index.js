@@ -18,6 +18,13 @@ const server = http.createServer(app);
 
 const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
 
+console.log("CLIENT_URL =", process.env.CLIENT_URL);
+console.log("Using clientUrl =", clientUrl);
+
+app.get("/", (req, res) => {
+  res.send("Backend is running");
+});
+
 const io = new Server(server, {
   cors: {
     origin: clientUrl,
